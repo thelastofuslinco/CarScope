@@ -1,10 +1,19 @@
 import React, { useContext, useState } from "react";
-import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
-import { useForm, Controller } from "react-hook-form";
+import {
+  View,
+  Text,
+  Alert,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
+import { useForm } from "react-hook-form";
 import { useNavigation } from "@react-navigation/native";
 import { RootStackParamList } from "@/models/RootStackParamList";
 import type { StackNavigationProp } from "@react-navigation/stack";
 import { AuthContext } from "@/context/AuthContext";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { ThemedInput } from "@/components/ThemedInput";
 
 type SignInScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -39,27 +48,18 @@ export default function SignIn() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text>Login</Text>
-      <Controller
+    <ThemedView className="flex-1 p-5 justify-center bg-gray-100">
+      <ThemedText type="title">Welcome!</ThemedText>
+
+      <ThemedInput
         control={control}
         name="user"
         rules={{ required: "Username is required" }}
-        render={({ field: { onChange, value } }) => (
-          <>
-            <TextInput
-              style={styles.input}
-              placeholder="User"
-              onChangeText={onChange}
-              value={value}
-            />
-            {errors.user && (
-              <Text style={styles.errorText}>{errors.user.message}</Text>
-            )}
-          </>
-        )}
+        placeholder="User"
+        errors={errors.user}
       />
-      <Controller
+
+      <ThemedInput
         control={control}
         name="password"
         rules={{
@@ -69,43 +69,25 @@ export default function SignIn() {
             message: "Password must be at least 3 characters",
           },
         }}
-        render={({ field: { onChange, value } }) => (
-          <>
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              secureTextEntry
-              onChangeText={onChange}
-              value={value}
-            />
-            {errors.password && (
-              <Text style={styles.errorText}>{errors.password.message}</Text>
-            )}
-          </>
-        )}
+        placeholder="Password"
+        errors={errors.password}
       />
-      <Button
-        title={isLoading ? "Logging in..." : "Login"}
-        onPress={handleSubmit(onSubmit)}
+
+      <TouchableOpacity
+        className={`w-full bg-blue-500 py-3 rounded-lg mt-4 ${
+          isLoading ? "opacity-70" : "opacity-100"
+        }`}
         disabled={isLoading}
-      />
-    </View>
+        onPress={handleSubmit(onSubmit)}
+      >
+        {isLoading ? (
+          <ActivityIndicator size="large" />
+        ) : (
+          <Text className="text-center text-white text-lg font-semibold">
+            Login
+          </Text>
+        )}
+      </TouchableOpacity>
+    </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: "center",
-  },
-  input: {
-    borderBottomWidth: 1,
-    marginBottom: 15,
-    padding: 10,
-  },
-  errorText: {
-    color: "red",
-    fontSize: 12,
-  },
-});

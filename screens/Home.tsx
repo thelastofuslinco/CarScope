@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
-import { View, Text, FlatList, Button } from "react-native";
+import { FlatList, Button } from "react-native";
 import { AuthContext } from "../context/AuthContext";
+import { ThemedView } from "@/components/ThemedView";
 
 export default function Home({ navigation }: any) {
   const [brands, setBrands] = useState([]);
@@ -13,8 +14,7 @@ export default function Home({ navigation }: any) {
   }, []);
 
   return (
-    <View>
-      <Text>Welcome, {authContext?.user}</Text>
+    <ThemedView>
       <FlatList
         data={brands}
         keyExtractor={(item) => item.codigo}
@@ -28,6 +28,6 @@ export default function Home({ navigation }: any) {
         )}
       />
       <Button title="Logout" onPress={authContext?.logout} />
-    </View>
+    </ThemedView>
   );
 }
