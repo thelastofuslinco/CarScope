@@ -1,11 +1,33 @@
-import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Animated } from "react-native";
 
 export default function Model({ route }: any) {
   const { brandId } = route.params;
   const [models, setModels] = useState<any[]>([]);
+
+  const [scaleValues, setScaleValues] = useState<{
+    [key: string]: Animated.Value;
+  }>({});
+
+  const handlePressIn = (itemId: string) => {
+    const newScaleValues = { ...scaleValues };
+    newScaleValues[itemId] = new Animated.Value(1);
+
+    Animated.spring(newScaleValues[itemId], {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+
+    setScaleValues(newScaleValues);
+  };
+
+  const handlePressOut = (itemId: string) => {
+    Animated.spring(scaleValues[itemId], {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+  };
 
   useEffect(() => {
     fetch(
@@ -17,28 +39,35 @@ export default function Model({ route }: any) {
 
   return (
     <ThemedView className="flex-1 bg-gray-100 p-4">
-      <ThemedText className="text-2xl font-bold text-center mb-6 text-gray-800">
-        Modelos de Carros
-      </ThemedText>
-
       <FlatList
         data={models}
         keyExtractor={(item) => item.codigo}
-        renderItem={({ item }) => (
-          <TouchableOpacity className="mb-4 bg-white p-4 rounded-lg shadow-md hover:bg-gray-200 transition-all duration-300">
-            <View className="flex-row items-center">
-              <Image
-                source={{
-                  uri: "https://www.iconfinder.com/icons/3167079/download/png/512", // exemplo de imagem
-                }}
-                className="w-10 h-10 rounded-full mr-4"
-              />
-              <Text className="text-lg font-semibold text-gray-800">
-                {item.nome}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        )}
+        renderItem={({ item }) => {
+          if (!scaleValues[item.codigo]) {
+            scaleValues[item.codigo] = new Animated.Value(1);
+          }
+
+          return (
+            <Animated.View
+              style={{
+                transform: [{ scale: scaleValues[item.codigo] }],
+              }}
+            >
+              <TouchableOpacity
+                className="mb-4 bg-white p-4 rounded-lg shadow-md"
+                onPressIn={() => handlePressIn(item.codigo)}
+                onPressOut={() => handlePressOut(item.codigo)}
+                activeOpacity={0.7}
+              >
+                <View className="flex-row items-center">
+                  <Text className="text-lg font-semibold text-gray-800">
+                    {item.nome}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </Animated.View>
+          );
+        }}
       />
     </ThemedView>
   );
